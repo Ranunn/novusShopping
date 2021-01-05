@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- qna 게시판 목록 보여주기 위한 sql -->
+<mapper namespace="user">
+	<select id="getQna" resultType="qna">
+		<![CDATA[
+		SELECT * FROM qna 
+		]]>
+	</select>
+	<select id="getQnaByCate" resultType="qna">
+		<![CDATA[
+		SELECT * FROM qna order by cate asc
+		]]>
+	</select>
+
+	<select id="getFaq" resultType="faq">
+		<![CDATA[
+		SELECT * FROM faq
+		]]>
+	</select>
+
+
+	<select id="getPostingList" resultType="posting">
+		<![CDATA[
+		SELECT * FROM posting
+		]]>
+	</select>
+
+	<insert id="insertQna" parameterType="qna">
+		INSERT INTO qna(
+		q_no,mem_id ,cate,write_date,q_title,q_content,reply
+		<if test="qfname != null">
+			,q_fname, q_fsize
+		</if>
+		) VALUES(
+		seq_q_no.nextval, #{memId}, #{cate},
+		sysdate,
+		#{qtitle},#{qcontent}, #{reply}
+		<if test="qfname != null">
+			,
+			#{qfname}, #{qfsize}
+		</if>
+
+		)
+	</insert>
+
+	<select id="searchDetail" parameterType="qna" resultType="qna">
+
+		SELECT
+		*
+		FROM qna
+		WHERE q_no = #{qno}
+
+	</select>
+	<delete id="deleteQna" parameterType="qna">
+		<![CDATA[
+		DELETE qna
+		WHERE q_no = #{qno}
+		]]>
+	</delete>
+
+	<update id="saveQnaAnswer" parameterType="qna">
+		UPDATE qna
+		SET
+		q_answer =
+		#{qanswer},answer_date = sysdate
+		WHERE q_no=#{qno}
+	</update>
+	<update id="mgrReviewAnswer" parameterType="review">
+		UPDATE
+		review
+		SET
+		answer = #{answer},answer_date = sysdate
+		WHERE
+		review_no=#{reviewNo}
+	</update>
+	<select id="getReviewList" resultType="review">
+		<![CDATA[
+		
+		select r.content as content,r.grade as grade,r.price as price,r.view_count as view_count, 	r.write_date as write_date,r.review_no as review_no,i.item_name as item_name from review r, item i where r.item_no = i.item_no order by r.write_date 
+		
+		]]>
+
+	</select>
+	<select id="getReviewListGrade" resultType="review">
+		<![CDATA[
+		
+		select r.content as content,r.grade as grade,r.price as price,r.view_count as view_count, r.write_date as write_date,r.review_no as review_no,i.item_name as item_name from review r, item i where r.item_no = i.item_no order by r.grade desc
+		
+		]]>
+	</select>
+	<select id="getReviewListGradeAsc" resultType="review">
+	    
+		<![CDATA[
+		
+		select r.content as content,r.grade as grade,r.price as price,r.view_count as view_count, r.write_date as write_date,r.review_no as review_no,i.item_name as item_name from review r, item i where r.item_no = i.item_no order by r.grade asc
+		
+		]]>
+	</select>
+	<select id="getReviewListView_count" resultType="review">
+		<![CDATA[
+		
+		select r.content as content,r.grade as grade,r.price as price,r.view_count as view_count, 	r.write_date as write_date,r.review_no as review_no,i.item_name as item_name from review r, item i where r.item_no = i.item_no order by r.view_count asc 
+		
+		]]>
+	</select>
+
+
+
+
+	<select id="searchDetailReview" parameterType="review"
+		resultType="review">
+
+		select r.answer as answer, r.answer_date as answer_date,
+		r.content as content,r.grade as grade,r.price as price,r.view_count
+		as
+		view_count, r.write_date as write_date,r.review_no as
+		review_no,i.item_name as item_name from review r, item i where
+		r.item_no = i.item_no and review_no = #{reviewNo}
+
+	</select>
+	<insert id="myOrder" parameterType="order">
+		INSERT INTO order_mgr(
+		order_no,price,order_item_no,mem_no,order_date,count,payment,delivery
+		) VALUES(
+		seq_order_no.nextval,#{price},#{orderItemNo},#{memNo},sysdate,#{count},#{payment},#{delivery}
+		)
+	</insert>
+
+	<!-- 결제 완료마다 상품번호에 해당하는 판매수 +1 증가 -->
+	<update id="buyCnt" parameterType="cnt">
+		UPDATE item_search SET
+		buy_count=buy_count+1 WHERE item_no=${itemNo}
+	</update>
+
+	<!-- 상세페이지 볼 때마다 상품번호에 해당하는 조회수 +1 증가 -->
+	<update id="viewCnt" parameterType="cnt">
+		UPDATE item_search SET
+		view_count=view_count+1 WHERE item_no=${itemNo}
+	</update>
+
+
+
+<!-- 승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥승옥 -->
+
+	<!-- 회원정보 전체 조회 -->
+	<select id="selectMemberList" resultType="member">
+		SELECT * FROM member
+	</select>
+
+	<!-- 회원정보 수정 페이지에 해당 회원 정보 출력 / 회원번호 memNo가 담긴 MemberVO가 parameterType 이고, 결과는 memberVO로 받는다. -->
+	<select id="selectMember" resultType="member" parameterType="member">
+		SELECT * FROM member WHERE MEM_NO=${memNo}
+	</select>
+	
+	<!-- 회원정보 수정 DB 반영 -->
+	<update id="updateMember" parameterType="member">
+		UPDATE member SET mem_id=#{memId}, mem_name=#{memName}, mem_tel=#{memTel}, mem_addr=#{memAddr}, 
+			mem_birth=#{memBirth}, mem_email=#{memEmail}, mem_grade=#{memGrade}, mem_total=#{memTotal} 
+		WHERE mem_no=#{memNo} 
+	</update>
+	
+	<!-- VIP 회원등급 기준 수정 DB 반영 -->
+	<update id="updateVIP" parameterType="member">
+		UPDATE member SET mem_grade='VIP'
+			WHERE mem_total > ${memVIP}
+	</update>
+	
+	<!-- VVIP 회원등급 기준 수정 DB 반영 -->
+	<update id="updateVVIP" parameterType="member">
+		UPDATE member SET mem_grade='VVIP'
+			WHERE mem_total > ${memVVIP}
+	</update>
+	
+	
+	<!-- 재직자 정보 전체 조회 -->
+	<select id="selectEmpList" resultType="mgr">
+		SELECT * FROM manager WHERE MGR_RESIGN='재직중'
+	</select>
+	
+	<!-- 퇴직자 정보 전체 조회 -->
+	<select id="selectExEmpList" resultType="mgr">
+		SELECT * FROM manager WHERE MGR_RESIGN='퇴사'
+	</select>
+
+	<!-- 사번이 담긴 MgrVO가 parameterType이고 resultType이 된다.-->
+	<select id="selectEmp" resultType="mgr" parameterType="mgr">
+		SELECT * FROM manager WHERE MGR_NO=${mgrNo}
+	</select>
+	
+	<!-- 직원 정보 수정 - 형 변환 문제로 입사일은 제외함 -->
+	<update id="updateEmp" parameterType="mgr">
+		UPDATE manager SET mgr_id=#{mgrId}, mgr_name=#{mgrName}, mgr_job=#{mgrJob}, mgr_dept=#{mgrDept},
+			mgr_sal=#{mgrSal}, mgr_email=#{mgrEmail}, mgr_resign=#{mgrResign}, mgr_etc=#{mgrEtc} 
+		WHERE mgr_no=#{mgrNo}
+	</update>
+	
+	
+	<!-- 리뷰, 교환/반품 작성 -->
+	<insert id="insertReview" parameterType="review">
+		INSERT INTO review(review_no, content, write_date, order_no, review_speed, item_no
+		<if test="reviewColor != null">
+		, review_color 
+		</if>
+		<if test="rFname != null">
+		, r_fname
+		</if>
+		) VALUES (seq_review_no.nextval, #{content}, sysdate, 20, #{reviewSpeed}, #{itemNo}
+		<if test="reviewColor != null">
+		, #{reviewColor}
+		</if> 
+		<if test="rFname != null">
+		, #{rFname}
+		</if>
+		)
+	</insert>
+	
+	<!-- 리뷰 작성시 상품번호에 따른 리뷰 수 +1 증가 -->
+	<update id="reviewCnt" parameterType="cnt">
+		UPDATE item_search SET review_count=review_count+1 WHERE item_no=${itemNo}
+	</update>
+	
+	<!-- 교환/반품 작성시 상품번호에 따른 교환수/반품수 +1 증가 -->
+	<update id="exchangeCnt" parameterType="review">
+		UPDATE item_search SET exchange_count=exchange_count+1 WHERE item_no=${itemNo}
+	</update>
+	<update id="refundCnt" parameterType="review">
+		UPDATE item_search SET refund_count=refund_count+1 WHERE item_no=${itemNo}
+	</update>
+	 
+	<!-- 주문내역 -->
+	<select id="selectBuyList" resultType="hashmap">
+	SELECT i.item_no item_no, i.item_name item_name, i.item_img item_img, i.price price, 
+			i.item_contecnt item_contecnt, 
+    		o.order_date order_date, o.count count, o.delivery delivery, o.mem_name mem_name
+	FROM item i INNER JOIN order_mgr o 
+	ON i.item_name = o.item_name
+	ORDER BY order_date DESC <!-- 
+	<if test="memNo != null">
+	WHERE mem_no={$memNo}
+	</if>
+	 -->
+	</select>
+	
+	<!-- 리뷰, 반품/교환 페이지에서 해당 상품 정보 보기 -->
+	<select id="selectBuy" resultType="item" parameterType="item">
+	SELECT item_no, item_name,item_img
+	FROM item
+	WHERE item_no = ${itemNo}<!-- 
+	<if test="memNo != null">
+	WHERE mem_no={$memNo}
+	</if>
+	 -->
+	</select>
+	
+	<!-- 일 매출 조회 -->
+	<select id="daySell" resultType="hashmap">
+	SELECT 
+		EXTRACT(YEAR FROM order_date) YEAR, 
+		EXTRACT(MONTH FROM order_date) MONTH, 
+		EXTRACT(DAY FROM order_date) DAY, 
+		sum(price) PRICE
+	FROM order_mgr 
+	GROUP BY 
+		EXTRACT(YEAR FROM order_date), 
+		EXTRACT(MONTH FROM order_date), 
+		EXTRACT(DAY FROM order_date)
+	ORDER BY EXTRACT(DAY FROM order_date) DESC
+	</select>
+
+	<!-- 
+	<select id="payment" resultType="hashmap">
+	SELECT 
+	    EXTRACT(YEAR FROM order_date) YEAR, 
+	    EXTRACT(MONTH FROM order_date) MONTH, 
+	    EXTRACT(DAY FROM order_date) DAY,
+	    payment 
+	FROM order_mgr 
+	ORDER BY order_date DESC
+	</select>
+	
+	<select id="card" resultType="hashmap">
+    SELECT 
+        EXTRACT(YEAR FROM order_date) YEAR, 
+	    EXTRACT(MONTH FROM order_date) MONTH, 
+        EXTRACT(DAY FROM order_date) DAY, 
+        count(payment) PAYMENT
+    FROM order_mgr 
+    WHERE payment='신용카드' 
+    GROUP BY 
+        EXTRACT(YEAR FROM order_date),
+        EXTRACT(MONTH FROM order_date),
+        EXTRACT(DAY FROM order_date) 
+    ORDER BY EXTRACT(DAY FROM order_date) DESC	
+	</select>
+	 -->
+	 
+	<!-- 월 매출 조회 -->
+	<select id="monthSell" resultType="hashmap">
+	SELECT 
+		EXTRACT(YEAR FROM order_date) YEAR, 
+		EXTRACT(MONTH FROM order_date) MONTH, 
+		sum(price) PRICE
+	FROM order_mgr 
+	GROUP BY 
+		EXTRACT(YEAR FROM order_date), 
+		EXTRACT(MONTH FROM order_date)
+	ORDER BY EXTRACT(MONTH FROM order_date) DESC	 
+	</select>
+	
+	<!-- 연 매출 조회 -->
+	<select id="yearSell" resultType="hashmap">
+	SELECT 
+		EXTRACT(YEAR FROM order_date) YEAR, 
+		sum(price) PRICE
+	FROM order_mgr 
+	GROUP BY 
+		EXTRACT(YEAR FROM order_date)
+	ORDER BY EXTRACT(YEAR FROM order_date) DESC
+	</select>
+	
+	<!-- 인기상품 조회 -->
+	
+	<select id="viewCntSearch" resultType="hashmap">
+	SELECT i.item_no item_no, i.item_name item_name, 
+    s.view_count, s.buy_count, s.review_count, s.refund_count, s.exchange_count 
+    FROM item i INNER JOIN item_search s
+    ON i.item_no = s.item_no
+    ORDER BY view_count DESC
+	</select>
+		
+	<select id="buyCntSearch" resultType="hashmap">
+	SELECT i.item_no item_no, i.item_name item_name, 
+    s.view_count, s.buy_count, s.review_count, s.refund_count, s.exchange_count 
+    FROM item i INNER JOIN item_search s
+    ON i.item_no = s.item_no
+    ORDER BY buy_count DESC
+	</select>
+	
+	<select id="reviewCntSearch" resultType="hashmap">
+	SELECT i.item_no item_no, i.item_name item_name, 
+    s.view_count, s.buy_count, s.review_count, s.refund_count, s.exchange_count 
+    FROM item i INNER JOIN item_search s
+    ON i.item_no = s.item_no
+    ORDER BY review_count DESC
+	</select>	
+	
+	<select id="refundCntSearch" resultType="hashmap">
+	SELECT i.item_no item_no, i.item_name item_name, 
+    s.view_count, s.buy_count, s.review_count, s.refund_count, s.exchange_count 
+    FROM item i INNER JOIN item_search s
+    ON i.item_no = s.item_no
+    ORDER BY refund_count DESC
+	</select>	
+	
+	<select id="exchangeCntSearch" resultType="hashmap">
+	SELECT i.item_no item_no, i.item_name item_name, 
+    s.view_count, s.buy_count, s.review_count, s.refund_count, s.exchange_count 
+    FROM item i INNER JOIN item_search s
+    ON i.item_no = s.item_no
+    ORDER BY exchange_count DESC
+	</select>	
+
+<!-- 은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별은별      -->
+<!-- 상품 관리 부분  -->
+<!-- 상품 추가 -->
+ <insert id="itemInsert" parameterType='item'>
+	INSERT INTO item(item_no, item_name, category, brand_name, price, count, item_contecnt)
+	VALUES (seq_item_no.NEXTVAL, #{itemName}, #{category}, #{brandName}, #{price}, #{count}, #{itemContent})
+</insert> 
+
+<!-- 상품 수정 아이템 불러오기 -->
+<select id="itemModifyList" parameterType="item" resultType="item">
+	<![CDATA[
+		SELECT * FROM item
+		WHERE item_no=#{itemNo}
+	]]>
+</select>
+
+<!-- 상품 수정 sql -->
+<update id="itemModify" parameterType="item" >
+	<![CDATA[ 
+		UPDATE item 
+		SET item_name=#{itemName}, category=#{category}, brand_name=#{brandName}, price=#{price}, count=#{count}, item_contecnt=#{itemContent}
+		WHERE item_no = #{itemNo}
+	]]>
+</update>
+
+<!-- 상품 삭제 -->
+<delete id="itemDelete" parameterType="item">
+	<![CDATA[
+		DELETE FROM item
+		WHERE item_name = #{itemName}
+	]]>
+</delete>
+
+<!-- 상품 검색리스트 -->
+<!-- <select id="itemSearch" parameterType="hashmap" resultType='item'>
+	<![CDATA[
+		SELECT * FROM item
+		WHERE item_name=#{itemName}
+	]]>
+</select> -->
+
+<!-- 고객 상품 검색 -->
+<select id="searchResult" parameterType="String" resultType="item">
+	<![CDATA[
+   		SELECT * 
+   		FROM item
+   		WHERE item_name LIKE '%'||#{search}||'%'
+   ]]>
+</select>
+
+<!-- 상품 리스트 -->
+<select id="getItemList" resultType="item">
+	SELECT * FROM item ORDER BY item_no DESC
+</select>
+
+<!-- 장바구니 추가 -->
+<insert id="cartInsert" parameterType="item">
+	INSERT INTO cart(item_name, count, price, item_img, total_price)
+	VALUES(#{itemName}, #{count}, #{price}, #{itemImg}, #{totalPrice})
+</insert>
+
+<!-- 장바구니 리스트 -->
+<select id="cartList" resultType="hashmap">
+	SELECT * FROM cart 
+</select>
+
+
+<!-- 주문 관리 부분(주문 리스트) -->
+<select id="getOrderList" resultType='order'>
+	SELECT * FROM order_mgr ORDER BY order_no DESC
+</select>
+
+<!-- 배송 관리 부분(배송 리스트) -->
+<select id="getDeliveryList" resultType='delivery' parameterType='delivery'>
+	<![CDATA[ 
+		SELECT o.order_no AS orderNo, o.mem_name AS memName, o.mem_no AS memNo, m.mem_addr AS memAddr, m.mem_tel AS memTel, o.item_name AS itemName, o.delivery AS delivery 
+		FROM order_mgr o, member m 
+		WHERE m.mem_no=o.mem_no
+	]]>
+</select>
+
+
+<!-- 수광 -->
+
+
+<insert parameterType="member" id="memInsert">
+
+<!-- <typeAlias alias="member" type="com.javassem.domain.MemberVO"/>에서 alias지정한이름이랑 parameterType="member"로 받아오기때문에 같은 이름으로 해야된다. -->
+
+INSERT INTO member(mem_No,mem_Id,mem_Pass,mem_Name,mem_Tel,mem_Addr,mem_Birth,mem_Email) VALUES(seq_mem_no.nextval,#{memId},#{memPass},#{memName},#{memTel},#{memAddr},#{memBirth},#{memEmail}) 
+</insert>
+
+<!-- 로그인 -->
+
+
+<select parameterType="member" id="idCheck" resultType="member">select *from member where mem_Id=#{memId}and mem_Pass=#{memPass} </select>
+
+<!-- 아이디 찾기 -->
+
+
+<select parameterType="member" id="idSearch" resultType="member">select * from member where mem_Name=#{memName}and mem_Email=#{memEmail} </select>
+
+<!-- 비밀번호 찾기 -->
+
+
+<select parameterType="member" id="passSearch" resultType="member">select * from member where mem_Id=#{memId}and mem_Name=#{memName}and mem_Email=#{memEmail} </select>
+
+
+
+<insert parameterType="mgr" id="mgrInsert">
+
+<!-- <typeAlias alias="member" type="com.javassem.domain.MemberVO"/>에서 alias지정한이름이랑 parameterType="member"로 받아오기때문에 같은 이름으로 해야된다. -->
+
+INSERT INTO manager (mgr_No,mgr_Id,mgr_Pass,mgr_Name,mgr_Tel,mgr_Job,mgr_Dept,mgr_Hire,mgr_Sal,mgr_Email,mgr_Resign,mgr_Etc)VALUES(#{mgrNo},#{mgrId},#{mgrPass},#{mgrName},#{mgrTel},#{mgrJob},#{mgrDept},#{mgrHire},#{mgrSal},#{mgrEmail},'재직중','회원가입을 축하합니다.') 
+</insert>
+
+<!-- 로그인 -->
+
+
+<select id="idCheckMgr" resultType="mgr"> select * from manager where mgr_Id=#{mgrId}and mgr_Pass=#{mgrPass} </select>
+
+<!-- 아이디 찾기 -->
+
+
+<select parameterType="mgr" id="idSearchMgr" resultType="mgr">select * from manager where mgr_No=#{mgrNo} and mgr_Name=#{mgrName} </select>
+
+<!-- 비밀번호 찾기 -->
+
+
+<select parameterType="mgr" id="passSearchMgr" resultType="mgr">select * from manager where mgr_No=#{mgrNo} and mgr_Id=#{mgrId} and mgr_Name=#{mgrName} </select>
+</mapper>

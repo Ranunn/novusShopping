@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+	<!-- Appenders -->
+	   <appender name="download" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value=""/>
+        <param name="Append" value="true"/>
+        <param name="dataPattern" value=".yyyy-MM-dd"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="[%d{yyyy-MM-dd HH:mm:ss}] %-5p: %F:%L - %m%n" />
+        </layout>
+    </appender>
+	
+	<!-- Application Loggers -->
+	<logger name="novus">
+		<level value="Info" />
+	</logger>
+	
+	<!-- 3rdparty Loggers -->
+	<logger name="org.springframework.core">
+		<level value="Info" />
+	</logger>	
+	
+	<logger name="org.springframework.beans">
+		<level value="Info" />
+	</logger>
+	
+	<logger name="org.springframework.context">
+		<level value="Info" />
+	</logger>
+
+	<logger name="org.springframework.web">
+		<level value="Info" />
+	</logger>
+
+	<!-- Root Logger -->
+	<root>
+		<priority value="Info" />
+		<appender-ref ref="download"/>
+
+	</root>
+	
+</log4j:configuration>

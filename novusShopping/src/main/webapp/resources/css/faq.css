@@ -1,0 +1,11 @@
+@charset "UTF-8";
+#table111{table-layout : inherit;}
+.firstTabs{font-size:large; font-family: 맑은 고딕;}
+.tab1{width:"10%";}
+.tab2{width:"60%";}
+.tab3{width:"10%";}
+.tab4{width:"20%";}
+#table111 #div1{}
+#table111 .gogo{ display: none; }
+
+/*display: none; * #table111 #gogo{ display: none;} */
